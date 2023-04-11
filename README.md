@@ -54,16 +54,36 @@ obj.method(fn, 1);
 22. Проверка чётности числа без оператора `%`
 23. Проверка существования подстроки в строке
 24. Как проверить, является ли число конечным?
-25. Чем отличается isNaN() от Number.isNaN()?
+25. Чем отличается `isNaN()` от `Number.isNaN()`?
+26. Garbage collector
+27. Как обработать неперехваченные исключения в Node?
+28. NODE_ENV
+29. globals
 
 ## Algorithms
+
+1. QuickSort
+2. MergeSort
+3. DFS
+4. BFS
 
 ## Architecture
 
 1. Какие плюсы и минусы у монолитной и микросервисной архитектур?
-2. REST
 
 ## API
+
+* REST
+* GraphQL
+* RPC
+* gRPC
+* SOAP
+* HATEOAS
+* XML-RPC
+* GSON
+* BPEL
+* BPM
+* ESB
 
 ## Async/await
 
@@ -72,10 +92,22 @@ obj.method(fn, 1);
 ## Authentication
 
 1. Token-based authentication
+2. JWT
+3. OAuth
 
 ## Buffer
 
-## Child Processes
+1. ArrayBuffer
+2. TypedArrays
+3. DataView
+
+## Child Processes/Threads
+
+1. Методы `.fork()` и `.spawn()`
+2. Разница между child process и worker threads
+3. node:process
+4. node:cluster
+5. SharedArrayBuffer
 
 ## Collections
 
@@ -96,13 +128,15 @@ obj.method(fn, 1);
 15. Как отсортировать массив нулей и единиц?
 16. Дан массив и целевая сумма двух элементов. Как найти индексы элементов, которые дают такую сумму?
 17. В чем разница между `Set` и `WeakSet`?
-18. Map
-19. Set
+18. `Map`
+19. `Set`
+20. `WeakMap`
+21. `WeakSet`
 
 ## Data Types/Formats
 
-1. Как можно написать собственную функцию isInteger(x)
-2. Что такое NaN? Какой у NaN тип? Как проверить на NaN?
+1. Как можно написать собственную функцию `isInteger(x)`
+2. Что такое `NaN`? Какой у `NaN` тип? Как проверить на `NaN`?
 3. Как проверить null?
 4. Что такое ступенчатый (зубчатый, jagged) массив?
 5. В чём разница между примтивными типами и объектными типами?
@@ -111,7 +145,7 @@ obj.method(fn, 1);
 8. Boxing/unboxing в JavaScript
 9. Почему не стоит использовать конструкторы типа new String?
 10. Записи (records) и кортежи (tuples)
-11. Почему typeof null возвращает object?
+11. Почему `typeof null` возвращает `object`?
 12. Как происходит преобразование типов в следующих примерах:
 
 ```
@@ -120,19 +154,42 @@ obj.method(fn, 1);
     ['x'] == 'x'
 ```
 
+13. Symbol
+
 ## Data Structures
+
+1. Linked List
+2. Stack
+3. Queue
+4. Binary Tree
+5. BST
+6. Heap
+7. Priority Queue
 
 ## Databases
 
 1. Чем отличается embed- от reference-связи в MongoDB?
+2. ActiveRecord и DataMapper
+3. Транзакции
+4. ACID
+5. n + 1
+6. MongoDB Aggregation Pipeline
 
-## EventLoop
+## EventLoop/Node.js Architecture
 
 1. EventLoop (Цикл событий)
 2. В чём разница между стеком вызовов и очередью задач?
 3. Микрозадачи и макрозадачи
+4. Преимущества однопоточной модели Node.js
+5. Разница между `process.nextTick` и `setImmediate`?
+6. Thread pool
+7. V8
+8. Почему при рекурсивном вызове `nextTick` блокирует цикл событий, а `setImmeidate` — нет?
+9. Паттерн Reactor и Node.js
 
 ## EventEmitter
+
+7. EventEmitter
 
 ## Functions
 
@@ -213,18 +270,31 @@ f = function() {
 ```
 
 28. Потеря контекста
+29. Итераторы
+30. Приведите примеры использования мемоизации
+31. Функции обратного вызова (callbacks)
+32. Позднее связывание
 
 ## HTTP
 
 1. Версии протокола HTTP
 2. Коды ответа (состояние) HTTP
-3. CORS
+3. Ограничения встроенного модуля http в Node.js?
+4. Типы HTTP-запросов
+5. В чём разница между HTTP-методами PUT, POST, UPDATE?
+6. TCP и HTTP
+7. HTTPS
 
 ## Modules. Packages
 
 1. CommonJS
 2. ES2015
 3. Паттерны импортирования модулей
+4. package-lock.json
+5. Разница между `npm install` и `npm ci`
+6. Плюсы yarn по сравнению с npm?
+7. Локальная и глобальная установкой npm-пакетов
+8. DI
 
 ## Objects
 
@@ -274,6 +344,8 @@ console.log(obj.someprop.x)
 17. Деструктуризация объектов
 18. Способы копирования простого объекта типа `obj = { a: 1, b: 2, c: 3 }`
 19. Функция structuredClone()
+20. Дескрипторы свойств объектов
+21. Создание неизменяемых объектов
 
 ## OOP. Classes
 
@@ -285,6 +357,7 @@ console.log(obj.someprop.x)
 6. Инкапсуляция. Приёмы в JS
 6. Полиморфизм. Приёмы в JS
 7. Разница между композицией и наследованием
+8. SOLID
 
 ## Patterns
 
@@ -292,13 +365,47 @@ console.log(obj.someprop.x)
 2. Middleware
 3. Observer
 4. Pub/sub
+5. CQS
+6. CQRS
+7. Event Sourcing
+8. GRASP
 
 ## Promises
 
 1. PromiseAPI
 2. Преимущества и недостатки использования PromiseAPI вместо обратных вызовов
+3. Чем отличается Promise от Observable?
+4. Что выведет следующий код?
 
-## Protocols
+```
+Promise
+    .resolve(10)					
+    .then(e => console.log(e))
+    .then(e => Promise.resolve(e))
+    .then(console.log)
+    .then(e => {
+        if (!e) {
+            throw 'Error caught'
+        }
+    })
+    .catch(e => {
+        console.log(e)
+        return new Error('New error')
+    })
+    .then(e => {
+        console.log(e.message)
+    })
+    .catch(e => {
+        console.log(e.message)
+    });
+```
+
+5. Разница между `Promise.all()` и `Promise.allSettled()`
+
+## Protocols/Network
+
+1. node:net
+2. WebSockets
 
 ## Prototypes
 
@@ -307,11 +414,12 @@ console.log(obj.someprop.x)
 3. В чём разница между `__proto__` и `prototype`?
 4. Можно ли записывать новые свойства/методы в прототипы стандартных классов и в каких случаях? Как обезопасить себя, если нужно расширить прототип? 
 
-## Proxy
+## Proxy API/ Reflect API
 
-## Recursion
+1. Proxy API
+2. Приведите примеры использования Proxy API
+3. Reflect API
 
-## Reflect
 
 ## RegExp
 
@@ -321,6 +429,9 @@ console.log(obj.someprop.x)
 ## Security
 
 1. XSS
+2. Как происходит проверка правильности пароля при использовании bcrypt?
+3. CORS
+4. Заголовки CORS
 
 ## Standards
 
@@ -329,22 +440,35 @@ console.log(obj.someprop.x)
 ## Streams
 
 1. Streams
+2. Разница между `readFile` и `createReadStream`?
 
 ## SQL
 
 1. Нормальные формы 1NF, 2NF, 3NF
-2. Left join, Right join
-3. Inner join
-4. Outer join
-5. Cross join
+2. `LEFT JOIN`
+3. `INNER JOIN`
+4. `FULL OUTER JOIN`
+5. Напишите SQL-запрос, который выбирает трех авторов, у которых больше всего книг
+6. Напишите SQL-запрос, который выбирает последние три комментария для конкретного пользователя для двух таблиц: comments и authors
+7. Оператор HAVING
+8. `GROUP` BY, аггрегация
+9. Напишите SQL-запрос, который выбирает последние три комментария для каждого пользователя для двух таблиц: comments и authors
+10. Типы данных MySQL
+11. `INSERT`
+12. `CREATE TABLE`
+13. Constraints
+14. `ALTER`
+15. Разница между `CHAR` и `VARCHAR`
+16. Разница между `DECIMAL`, `FLOAT`, `DOUBLE`
+17. `CREATE FUNCTION`
+18. `CREATE PROCEDURE`
 
 ## Testing
 
 1. Пирамида тестирования
 2. Unit-тесты
 3. Code-coverage
-
-## Threads
+4. Что такое стабы (stubs)?
 
 ## Timers
 
@@ -365,23 +489,33 @@ for (var i = 0; i < 5; i++) {
 } 
 ```
 
-3. setImmediate
+3. `setImmediate`
+4. Разница между `setImmediate` и `setTimeout(0)`?
 
 ## TypeScript
+
+1. Объявление функций
+2. Полиморфизм
+3. Интерфейсы
+4. Generics
 
 ## Version Control
 
 1. Системы контроля версий
-2. git fetch
+2. `git fetch`
 3. Git-hygiene подходы
+4. Разница между `git merge` и `git rebase`
+5. Staging area
+6. `git reset --hard`
+7. `git merge`
+8. `git checkout`
+9. `git rebase`
+10. `git stash`
+11. `git revert`
 
 ## Web APIs
 
 1. localStorage, sessionStorage, cookies
-
----
-
-см. 172+
 
 <!-- <details>
   <summary>Вопрос</summary>
