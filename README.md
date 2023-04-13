@@ -754,7 +754,151 @@ Promise
 
 ## Streams
 
-1. Streams
+<details>
+    <summary>1. Streams</summary>
+    Stream — механизм передачи данных порциями.
+
+    Все стримы — экземпляры EventEmitter. Соответственно, они могут эмитить события, например, когда данные доступны для чтения.
+
+    Иерархия классов выглядит так:
+
+    * EventEmitter
+        * Stream
+            * stream.Readable
+                * fs.readableStream
+            * stream.Writable
+                * fs.writableStream
+
+    Все стримы в NodeJS работают исключительно со строками и Buffer (Uint8Array). Для работы с другими типами значений Stream (касается только чтения?) должен работать в objectMode.
+
+    Четыре типа стримов в NodeJS:
+    * Readable
+    * Writable
+    * Duplex
+    * Transfrom — Duplex-стрим, который может модифицировать данные
+
+    Модуль node:stream (node:stream/promises) может исользоваться для создания новых типов экземпляров стримов. Обычно он не нужен (!) для использования стримов.
+
+    Стоит отметить, что fs.ReadStream и fs.WriteStream — классы, экземпляры которых создаются с помощью fs.createReadStream() и fs.createWriteStream(). 
+
+    Примеры стримов в модулях NodeJS (экзмепляры классов fs.readStream и fs.writeStream):
+    * process.stdin
+    * process.stdout
+    * process.stderr
+    * fs.createReadStream
+    * fs.createWriteStream
+
+    Экземпляры классов stream.Readable и stream.Writable:
+    * net.Socket()
+
+    Стримы хранят данные во внутреннем буфере. Количество буферизуемых данных в байтах устанавливается значением highWaterMark (в objectMode — не в байтах, а в объектах).
+
+    ```
+    const readableStream = fs.createReadStream('./data', { highWaterMark: 8 })
+    ```
+
+    Как только внутренний буфер заполняется, стрим временно перестаёт читать данные, пока данные их буфера не будут использованы!
+
+    Для того, чтобы добавить содержимое во внутренний буфер, используются методы:
+    * readable.push() — добавляет фрагмент,  который будет стоять во внутренней очереди до потребления
+    * writable.write() — записывает фрагмент
+
+    Duplex и Transform являются одновременно Readable и Writable, поэтому у них два внутренних буфера.
+
+    Readable стримы используют EventEmitter API для уведомления о том, когда данные готовы быть прочитанными из стрима. Примеры:
+
+    ```
+    req.on('data', chunk => {})
+    req.on('end', () => {})
+    ```
+
+    События Readable-стримов:
+    * readable  — стрим приостановлен, но есть доступные данные для чтения, которые можно получить с помощью метода .read(size). Может возникнуть ситуация, когда внутрений буфер стрима будет заполнен и стрим перестанет читать пакеты от ОС.
+    * data — запускает стрим. Можно остановить и продолжить передачу с помощью методов pause() и resume()
+    * close —
+    * end —
+    * resume —
+    * pause —
+
+    Режимы Readable-стримов:
+    * paused — по-умолчанию
+    * flowing
+    * object
+
+    При этом режимы flowing и paused независимы от  object mode.
+
+    Все Readable-стримы начинают работать в режиме paused, но могут переключаться в режим flowing с помощью:
+    * добавления обработчика 'data': `readable.on('data', chunk => {})`
+    * вызова readable.resume()
+    * вызова readable.pipe(writable)
+
+    Переключиться в режим paused можно с помощью:
+    * readable.pause(), если не использовался .pipe()
+    * readable.unpipe(), если использовался .pipe()
+
+    Paused:
+    ```
+    stream.on('readable' () => {
+        stream.read(8)
+    })
+    ```
+
+    Через readableFlowing доступна информация о состоянии:
+    * null — не запущен
+    * true — flowing
+    * false — остановлен с помощью .pause()
+
+    Writable стримы предоставляют методы write() и end() для записи данных в стримы. Примеры
+
+    ```
+    res.write()
+    res.end()
+    ```
+
+    Общий паттерн использования:
+
+    ```
+    myStream.write()
+    myStream.write()
+    myStream.end()
+    ```
+
+    Примеры Writable стримов:
+    * http res
+    * fs write
+    * process.stdout
+    * process.stderr
+
+    События Writable-стримов:
+    * close —
+    * error —
+    * drain —
+    * finish — когда вызван .end()
+    * pipe —
+    * unpipe —
+
+    Паттерны создания собственных стримов:
+
+    ```
+    class MyWritable extends Writable {}
+    ```
+
+    ```
+    const myWriatble = new Wriatble({})
+    ```
+
+    Для создания собственных экземпляров стримов необходимо имплементировать:
+    * Readable: _read()
+    * Writable: _write(), _writev(), _final()
+    * Duplex: _read(), _write(), _writev(), _final()
+    * Transform: _transform(), _flush(), _final)_
+
+    Метод .pipe() позволяет соединить вывод Readable-стрима со входом Writable-стрима
+
+    ```
+    readable.pipe(writable)
+    ```
+</details>
 2. Разница между `readFile` и `createReadStream`?
 
 ## SQL
