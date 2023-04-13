@@ -342,6 +342,7 @@ obj.method(fn, 1);
 1. Разница между child process и worker threads
 <details>
     <summary>2. node:child_process</summary>
+    
     ## spawn()
 
     index.js:
@@ -450,7 +451,48 @@ obj.method(fn, 1);
 
     Используем, когда необходимо вынести сложные вычисления из основного цикла событий в отдельный процесс NodeJS.
 </details>
-3. node:cluster
+
+<details>
+    <summary>3. node:cluster</summary>
+
+    index.js:
+    ```
+    const http = require('node:http')
+    const cluster = require('node:cluster')
+    const CPUS = 4
+
+    if (cluster.isPrimary) {
+        console.log('Primary! pid:', process.pid)
+        for (let i = 0; i < CPUS; i++) {
+            cluster.fork()
+        }
+    } 
+    else {
+        const handler = (req, res) => { 
+            res.end('Hello from HTTP Server! pid:' +  process.pid) 
+        }
+
+        http
+            .createServer(handler)
+            .listen(3000)
+    }
+    ```
+
+    Кластеры NodeJS-процессов используются для запуска нескольких экземпляров NodeJS (воркеров), между которыми могут быть распределена нагрузка.
+
+    Worker'ы (дочерние процессы) запускаются с помощью child_process.fork(). Соответственно, может использоваться IPC для обмена сообщениями между родительским процессом и воркерами.
+
+    Модуль cluster поддерживает два способа распределения входящих подключений:
+    * RoundRobin (стандартный для всех платформ, кроме Windows). Родительский процесс слушает на порту, принимает подключения и распределяет их между воркерами
+    * Воркеры принимают входящие подключения напрямую (в теории должно давать лучшую производительность, но на практике — нет)
+
+    ```
+    curl localhost:3000 // для проверки RR
+    ```
+
+    Так как воркеры — независимые процессы, они могут быть убиты или перезапущены, не влияя при этом на остальные воркеры.
+</details>
+
 4. SharedArrayBuffer
 
 ## Collections
@@ -598,7 +640,6 @@ obj.method(fn, 1);
     Приоритетные очереди (исполняются, когда EventLoop не находится ни в одной из перечисленных фаз):
     * nextTickQueue
     * Microtask Queue
-
 </details>
 
 2. В чём разница между стеком вызовов и очередью задач?
