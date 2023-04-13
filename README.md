@@ -339,10 +339,17 @@ obj.method(fn, 1);
 
 ## Child Processes/Threads
 
-1. Разница между child process и worker threads
+<details>
+    <summary>1. Разница между child process и worker threads</summary>
+
+    Worker Threads позволяют запускать множество тредов параллельно в одном экземпляре NodeJS. Используются, когда не нужна такая изоляция, как у процессов: в отличии от child_process и cluster, треды могут расшаривать память. Это делает с помощью передачи экземпляров ArrayBuffer или расшаривания экземпляров SharedArrayBuffer. 
+
+    Используются для CPU-интенсивных операций. Не слишком эффективны для I/O-интенсивных операций. Встроенные в NodeJS асинхронные функции справляются с этим лучше.
+</details>
+
 <details>
     <summary>2. node:child_process</summary>
-    
+
     ## spawn()
 
     index.js:
