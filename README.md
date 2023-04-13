@@ -444,7 +444,65 @@ Promise
 
 ## SQL
 
-1. Нормальные формы 1NF, 2NF, 3NF
+<details>
+    <summary>1. Нормальные формы 1NF, 2NF, 3NF</summary>
+
+    Нормализация — организация данных в БД путём установления отношений между ними, устранения избыточности и несогласованных зависимостей.
+
+    Существуют правила нормализации. Каждое правило называют нормальной формой (NF). Если выполняется первое правило, говорят, что БД в 1NF, если первые три — в 3NF, и т. д.
+
+    Денормализованная база данных содержит большое количество избыточных данных, требуется меньше join'ов во время запросов. В нормализованной — наоборот (меньше избыточности, больше join'ов).
+
+    Пример таблицы без нормализации:
+
+    | Name        | Address             | Movies                                          |
+    |-------------|---------------------|-------------------------------------------------|
+    | Janet Jones | First Street Plot 4 | Pirates of the Caribbean, Clash of Titans       |
+    | Robert Phil | 3rd Street 34       | Forgetting Sarrah Marshal, Daddy's Little Girls |
+    | Robert Phil | 5th Avenue          | Clash of Titans                                 |
+
+    1NF:
+    * Устранены повторяющиеся группы в отдельных таблицах (например столбцы Movie1, Movie2, Movie3) или массивы (каждая ячейка таблицы должна содержать одно значение)
+    
+    Пример таблицы в 1NF:
+
+    | Name        | Address             | Movie                     |
+    |-------------|---------------------|---------------------------|
+    | Janet Jones | First Street Plot 4 | Pirates of the Caribbean  |
+    | Janet Jones | First Street Plot 4 | Clash of Titans           |
+    | Robert Phil | 3rd Street 34       | Forgetting Sarrah Marshal |
+    | Robert Phil | 3rd Street 34       | Daddy's Little Girls      |
+    | Robert Phil | 5th Avenue          | Clash of Titans           |
+
+    2NF:
+    * Таблицы должны быть в 1NF
+    * Устранена избыточность (созданы таблицы для наборов значений, относящихся к нескольким записям, а сами таблицы связаны внешними ключами)
+
+    Пример БД в 2NF:
+
+    | Id | Name        | Address             |
+    |----|-------------|---------------------|
+    | 1  | Janet Jones | First Street Plot 4 |
+    | 2  | Robert Phil | 3rd Street 34       |
+    | 3  | Robert Phil | 5th Avenue          |
+
+    | Movie                     | Person Id |
+    |---------------------------|-----------|
+    | Pirates of the Caribbean  | 1         |
+    | Clash of Titans           | 1         |
+    | Forgetting Sarrah Marshal | 2         |
+    | Daddy's Little Girls      | 2         |
+    | Clash of Titans           | 3         |
+
+    3NF:
+    * Таблицы должны быть в 2NF
+    * Все неключевые поля, содержимое которых может относиться к нескольким записям выносятся в отдельные таблицы
+
+    Cсылки:
+    * https://learn.microsoft.com/ru-ru/office/troubleshoot/access/database-normalization-description
+
+</details>
+
 2. `LEFT JOIN`
 3. `INNER JOIN`
 4. `FULL OUTER JOIN`
