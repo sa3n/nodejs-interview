@@ -101,6 +101,242 @@ obj.method(fn, 1);
 2. TypedArrays
 3. DataView
 
+<details>
+    <summary>4. Buffer</summary>
+    Буфер — порция передаваемых данных
+    Buffer — объект, предоставляющий способ работы с бинарными данными различного вида. Используется для представления последовательности байт (именно байт, а не бит) фиксированной длины.
+
+    Класс Buffer является подклассом класса Uint8Array, который, в свою очередь, является подклассом класса TypedArray. И, соответственно, все методы TypedArray доступны для буферов (с некоторыми ограниченями).
+
+    ```
+    console.log(Buffer.__proto__)                         // [Function: Uint8Array]
+    console.log(Buffer.__proto__.__proto__)     // [Function: TypedArray]
+    ```
+
+    Иерархия классов:
+    * ArrayBuffer
+        * TypedArray
+            * Int8Array
+                * Buffer
+
+    Свойство экземпляра .buffer возвращает объект ArrayBuffer, на базе которого Buffer был создан:
+
+    ```
+    const buff = Buffer.alloc(16)
+    console.log(buff.buffer)
+    ```
+
+    Для заполнения буфера можно использовать метод .fill():
+
+    ```
+    const buffer = Buffer.alloc(8)
+    buffer.fill(1) // <Buffer 01 01 01 01 01 01 01 01>
+    ```
+
+    ## Аллокация
+
+    Выделить память под буфер можно используя статические методы:
+    * Buffer.alloc(size, fill?, encoding?) — если не указан fill, заполняется нулями
+    * Buffer.allocUnsafe(size) — быстрее, но может содержать чувствительные данные, которые ранее содержались в памяти, причём не только те, которые содержались в буферах
+    * Buffer.allocUnsafeSlow(size) — ???
+
+    где size — объём в байтах
+    fill — значение, которым будет заполнен буфер, может быть типов: string, Buffer, Uint8Array, integer.
+
+    Байты при этом заполняются циклически:
+
+    ```
+    Buffer.alloc(16, 0xEF)  // <Buffer ef ef ef ef ef ef ef ef ef ef ef ef ef ef ef ef>
+
+    Buffer.alloc(16)            // <Buffer 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00>
+    Buffer.alloc(16, 10)     // <Buffer 0a 0a 0a 0a 0a 0a 0a 0a 0a 0a 0a 0a 0a 0a 0a 0a>
+    Buffer.alloc(16, 161)   // <Buffer a1 a1 a1 a1 a1 a1 a1 a1 a1 a1 a1 a1 a1 a1 a1 a1>
+    Buffer.alloc(16, 256)   // <Buffer 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00>
+
+    Buffer.alloc(16, 'A')       // <Buffer 41 41 41 41 41 41 41 41 41 41 41 41 41 41 41 41>
+    Buffer.alloc(16, 'AB')     //<Buffer 41 42 41 42 41 42 41 42 41 42 41 42 41 42 41 42>
+    ```
+
+    Получать доступ к байтам буфера можно по индексу. При этом мы получаем значение байта в виде целого числа в десятичной системе счисления!
+
+    Так же возможно вносить изменения:
+
+    ```
+    const buffer = Buffer.alloc(16, 'HELLO')
+    console.log(buffer)          // <Buffer 48 45 4c 4c 4f 48 45 4c 4c 4f 48 45 4c 4c 4f 48>
+    console.log(buffer[0])     // 72
+    buffer[0] += 1
+    console.log(buffer)          // <Buffer 49 45 4c 4c 4f 48 45 4c 4c 4f 48 45 4c 4c 4f 48>
+    ```
+
+    Кроме того, можно использовать статический метод Buffer.from(), который в качестве первого аргумента может принимать значения типов: array, arrayBuffer, buffer, string. Все примеры ниже дают один и тот же резульата:
+
+    ```
+    // <Buffer 68 65 6c 6c 6f>
+    Buffer.from([0x68, 0x65, 0x6c, 0x6c, 0x6f])
+    Buffer.from([104, 101, 108, 108, 111])
+    Buffer.from(Buffer.alloc(5, 'hello'))
+    Buffer.from('hello')
+    ```
+
+    ## Побитовые операции
+
+    Для работы с отдельными битами можно использовать побитовые операции и битовые маски.
+
+    Побитовые операторы в JavaScript:
+    | AND | OR | XOR | NOT | LS | RS |
+    |-----|----|-----|-----|----|----|
+    | &   | \| | ^   | ~   | << | >> |
+
+    На примере сдвига влево:
+
+    ```
+    const buffer = Buffer.alloc(1, 0xAB)
+    console.log(buffer) // <Buffer ab>
+    console.log(buffer[0], buffer[0].toString(2).padStart(8, '0')) // 171 10101011
+    buffer[0] <<= 1
+    console.log(buffer[0], buffer[0].toString(2).padStart(8, '0')) // 86 01010110
+    buffer[0] <<= 1
+    console.log(buffer[0], buffer[0].toString(2).padStart(8, '0')) // 172 10101100
+    buffer[0] <<= 1
+    console.log(buffer[0], buffer[0].toString(2).padStart(8, '0')) // 88 01011000
+    ```
+
+    Комментарий: 10101011 -> 0101011|0 -> 101011|00 -> 01011|000
+
+    ## Использование битовых масок.
+
+    Допустим, нам необходимо извлечь из байта биты 2—5. Для этого необходимо создать маску 00111100, где единицы стоят на местах соответствующих битов, после чего совершить сдвиг вправо на две позиции (2 пропущенных бита). 
+
+    Маска 0011 1100 в шестнадцатеричной СС выглядит как 3C:
+
+    ```
+    const mask = Buffer.alloc(1, 0x3C)[0]
+    console.log(mask.toString(2).padStart(8, '0'))      // 00111100
+    const buff = Buffer.alloc(1, 0xAA)
+    console.log(buff[0].toString(2).padStart(8, '0'))   // 10101010
+    buff[0] &= mask
+    console.log(buff[0].toString(2).padStart(8, '0'))   // 00101000
+    buff[0] >>= 2
+    console.log(buff[0].toString(2).padStart(8, '0'))   // 00001010
+    console.log(buff[0])                                                       // 10
+    console.log(buff)                                                            // <Buffer 0a>
+    ```
+
+    ## Итерирование 
+
+    Для итерирования можно использовать как обычные циклы, так и for of:
+
+    ```
+    const buff = Buffer.alloc(16, 'HELLO WORLD')
+
+    for (const byte of buff) {
+        console.log(String.fromCharCode(byte))
+    }
+
+    const it = buff[Symbol.iterator]()
+    console.log(it.next())
+    ```
+
+    ## Кодировки
+
+    Для преобразования в строку можно использовать метод .toString(). При этом, если не указана кодировка, NodeJS использует UTF-8 по-умолчанию:
+
+    ```
+    const buffer = Buffer.from([0x68, 0x65, 0x6c, 0x6c, 0x6f, 0xd0, 0xbc, 0xd0, 0xb8, 0xd1, 0x80])
+
+    console.log(buffer)                                             
+    console.log(buffer.toString()) // helloмир
+    ```
+
+    Здесь в UTF-8 первые пять байт соответствуют 5 латинским буквам, а оставшиеся 6 — трём кириллическим (по 2 байта на каждую).
+
+    Кроме того поддерживаются кодировки:
+    * urf8
+    * utf16le
+    * latin1
+    * base64
+    * base64url
+    * hex
+
+    ```
+    console.log(buffer.toString('utf16le'))       // 敨汬큯킼톸
+    console.log(buffer.toString('latin1'))          // helloÐ¼Ð¸Ñ
+    console.log(buffer.toString('base64'))       // aGVsbG/QvNC40YA=
+    console.log(buffer.toString('base64url')) // aGVsbG_QvNC40YA
+    console.log(buffer.toString('hex'))             // 68656c6c6fd0bcd0b8d180
+    ```
+
+    ## Методы экзмепляра read. Int vs UInt
+
+    Int — формат, используемый для представления целых положительных и отрицательных чисел. Для представления только положительных чисел может использоваться беззнаковое представление UInt. 
+
+    * Int — signed integer — знаковое целое число
+    * UInt — unsigned integer — беззнаковое число
+
+    При использовании Int при установленном крайнем левом бите (sign bit) число становится отрицательным. Для вычисления актуального значения отрицательного числа, представленного таким образом, необходимо вычислить дополнительный код: вычислить обратный код (заменить 0 на 1, а 1 на 0) и прибавить 1.
+
+    Пример:
+
+    ```
+    0x8A -> 10001010 -> 01110101 + 1 -> 01110110 -> 118
+    ```
+
+    Для доступа к отдельным байтам может использоваться вспомогательные объекты-представление, общее название которых — TypedArray (типизированный массив), например:
+    * Int8Array, Int16Array, Int32Array
+    * Uint8Array, Uint16Array, Uint32Array
+    * существуют и другие!
+
+    где число указывает на количество бит (не байт!), которое нужно прочитать:
+
+    ```
+    const buffer = Buffer.alloc(1, 0x8A)
+    console.log(buffer.readUint8())
+    console.log(buffer.readInt8())
+    ```
+
+    В качестве аргумента можно передать оффсет — смещение в байтах.   
+
+    ## LittleEndian vs BigEndian
+
+    LE и BE — варианты порядка записи байт в памяти:
+    * BigEndian — порядок записи от старшего байта к младшему, то есть слева-направо в привычном порядке.
+    * LIttleEndian — порядок чтения от младшего байта к старшему, то есть справа-налево.
+
+    ```
+    const buffer = Buffer.from('message!')
+
+    console.log(buffer)                                 // <Buffer 6d 65 73 73 61 67 65 21>
+    console.log(buffer.readUInt16BE()) // (1) 28005
+    console.log(buffer.readUint16LE())  // (2) 25965
+    ```
+
+    Пояснения:
+    6d 65 73 73 61 67 65 21 = 0110 1101 | 0110 0101 | 0111 0011 | 0111 0011 | 0110 0001 | 0110 0111 | 0110 0101 | 0010 0001
+    1) 0110 1101 | 0110 0101 = 28005 (два первых байта)
+    2) 0110 0101 | 0110 1101 = 25965 (два первых байта справа налево)
+
+    ## Получение фрагмента буфера
+
+    Метод  экземпляра .subarray() возвращает новый буфер, который ссылается на ту же область памяти, что и оригинал. При этом можно указать индексы начала и конца среза, получив таким образом фрагмент (ссылку на фрагмент) исходного буфера.
+
+    ```
+    const buffer = Buffer.from('message!')  // <Buffer 6d 65 73 73 61 67 65 21>
+
+    const buffer2 = buffer.subarray(1, 3)
+    buffer2[0] = 0x00
+
+    console.log(buffer2) // <Buffer 00 73>
+    console.log(buffer) // <Buffer 6d 00 73 73 61 67 65 21> изменился!
+
+    // may vary:
+    console.log(buffer.byteOffset) // 0
+    console.log(buffer2.byteOffset) // 1
+    ```
+
+    (offset считается для лежащего в основе TypedArray, внутри пула выделяенной памяти?)
+</details>
+
 ## Child Processes/Threads
 
 1. Методы `.fork()` и `.spawn()`
