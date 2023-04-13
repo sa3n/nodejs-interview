@@ -660,7 +660,57 @@ obj.method(fn, 1);
 
 ## EventEmitter
 
-7. EventEmitter
+<details>
+    <summary>1. EventEmitter</summary>
+    
+    Большая часть API NodeJS построена по принципу Event-Driven архитектуры:
+    * объекты-emitter'ы эмитируют именованные события
+    * эти события приводят в вызову функций-обработчиков (listeners)
+
+    Все объекты, эмитирующие события — экземпляры класса EventEmitter, предоставляющего методы:
+    * .emit() — эмитирует события
+    * .on() — связывает обработчик (или несколько) с событием
+
+    Обработчики, связанные с событием выполняются СИНХРОННО в порядке их регистрации, что позволяет убедиться в корректной последовательности выполнения действий и избежать race condition. Все возвращаемые обработчиками значения игнорируются.
+
+    При необходимости обработчики событий всё же можно перевести в асинхронный режим, используя setImmediate() или process.nextTick()
+
+    Часто используется extends для создания подкласса:
+
+    ```
+    const EventEmitter = require('node:events')
+
+    class MyEmitter extends EventEmitter {}
+    cinst myEmitter = new MyEmitter()
+
+    myEmitter.on('event', () => {})
+    myEmitter.emit('event')
+    ```
+
+    Возможна передача аргументов обработчикам:
+
+    ```
+    myEmitter.on('event', (name1, name2) => {})
+    myEmitter.emit('event', 'alice', 'bob')
+    ```
+
+    Только при использовании обычных (не стрелочных) функций в качестве обработчиков, this будет привязано к конкретному экземпляру EventEmitter!
+
+    Кроме того:
+    * myEmitter.once('event', () => {}) — для однократной обработки события
+    * myEmitter.emit('error', new Error()) — считается особым случаем
+
+    Класс EventEmitter:
+    * Каждый раз, когда добавляется новый обработчик, EventEmitter эмитирует событие 'newListener', а когда обработчик удаляется — событие 'removeListener'
+
+    Экземпляры класса:
+    * emitter.on(eventName, listener) = emitter.addListener(eventName, listener)
+    * emitter.prependListener(eventName, listener) — добавить обработчик в начало массива обработчиков
+    * emitter.eventNames() — массив имён событий
+    * emitter.listeners(eventName) — массив функций-обработчиков события
+    * emitter.off(eventName, listener) = emitter.removeListener(eventName, listener)
+    * emitter.removeAllListeners(eventName)
+</details>
 
 ## Functions
 
