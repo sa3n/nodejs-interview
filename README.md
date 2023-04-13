@@ -339,11 +339,119 @@ obj.method(fn, 1);
 
 ## Child Processes/Threads
 
-1. Методы `.fork()` и `.spawn()`
-2. Разница между child process и worker threads
-3. node:process
-4. node:cluster
-5. SharedArrayBuffer
+1. Разница между child process и worker threads
+<details>
+    <summary>2. node:child_process</summary>
+    ## spawn()
+
+    index.js:
+    ```
+    const { spawn } = require('node:child_process')
+
+    const nodeHello = spawn('node', ['hello.js'])
+
+    nodeHello.stdout.on('data', data => {
+        console.log('Node.js:', data.toString())
+    })
+    ```
+
+    hello.js:
+    ```
+    setInterval(() => {
+        process.stdout.write('Subprocess: hello')
+    }, 1500)
+    ```
+
+    Spawn'ит подпроцесс (запускает команду как новый процесс). 
+
+    Функция spawn возвращает экземпляр класса ChildProcess, который имеет свойства stdin, stdout, stderr. (т. е. между родительским процессом и подпроцессами устанавливаются конвееры). При этом не создаётся нового экземпляра V8.
+
+    ChildProcess, в свою очередь, имплементирует EvenEmitter API, поэтому мы можем использовать метод on.
+
+    Spawn не создаёт shell для выполнения команд.
+
+    Использует стримы. Поэтому выгодно использовать для управления процессами, порождающими большое количество данных или работающими с чтением больших данных. Кейс: хотим, чтобы дочерний процесс вернул большое количество данных родительскому процессу, например 1GB видео.
+
+    Есть опция options.stdio (смотри документацию):
+
+    ```
+    const nodeHello = spawn('node', ['hello.js'], options)
+    ```
+
+    Использовать запись в файловый дескриптор дочернего процесса со spawn не получается (создаётся Socket? с которым нельзя взаимодействовать таким образом).
+
+    ## exec()
+
+    index.js:
+    ```
+    const { exec } = require('node:child_process')
+
+    exec('ls / | grep ^s', (err, stdout, stderr) => {
+        process.stdout.write(stdout)
+    })
+    ```
+
+    Spawn'ит shell и запускает команду в нём, пробрасывая stdout и stderr в callback-функцию. Новый процесс при этом не создаётся.
+
+    Так как использует shell, могут быть запущены потенциально опасные операции.
+
+    Использует буферизацию stdout в памяти. Поэтому имеет смысл использовать, когда объём данных небольшой и нужен синтаксис и функционал shell (например pipe).
+
+    В качестве опций можно установить:
+    * cwd — рабочую директорию дочернего процесса
+    * shell — по-уомлчанию /bin/sh
+
+    ## execFile()
+
+    index.js:
+    ```
+    const { execFile } = require('node:child_process')
+
+    execFile('node', ['hello.js'], (err, stdout, stderr) => {
+        process.stdout.write(stdout)
+    })
+    ```
+
+    hello.js:
+    ```
+    process.stdout.write('Child: hello')
+    ```
+
+    Похоже на exec, но не spawn'ит shell по-умолчанию (соответственно, такое как поведение, как, например, перенаправление I/O не поддерживается). Вместо этого указаный исполняемый файл  запускается как новый процесс. То есть под капотом используется тот же spawn.
+
+    Если опция shell активирована, так же могут быть выполнены потенциально опасные операции.
+
+    ## fork()
+
+    index.js:
+    ```
+    const { fork } = require('node:child_process')
+
+    const child = fork('./hello.js')
+
+    child.on('message', message => {
+        console.log('Parent:', message)
+    })
+    ```
+
+    hello.js:
+    ```
+    process.send('Child: hello')
+    ```
+
+    Специальный случай spawn, используемый для запуска NodeJS-процессов. 
+
+    Функция fork() так же возвращает экземпляр класса ChildProcess, который имеет дополнительный коммуникационный канал для обмена сообщениями (IPC) между родителем и дочерними процессами (метод .send() и обработчик .on('message')). При этом стримы в этом канале не используются.
+
+    * process.send() — для отправки сообщений родительскому процессу из дочерних
+    * child.on('message', msg => {}) — для получения сообщений из дочерних процессов родительским
+
+    Дочерние процессы являются независимыми от родительского: имеют собственную память и экземпляр V8. То есть в отличии от fork в POSIX, процесс не клонируется.
+
+    Используем, когда необходимо вынести сложные вычисления из основного цикла событий в отдельный процесс NodeJS.
+</details>
+3. node:cluster
+4. SharedArrayBuffer
 
 ## Collections
 
