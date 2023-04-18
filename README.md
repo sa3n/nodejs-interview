@@ -1304,8 +1304,35 @@ Promise
     ```
 </details>
 
-7. Оператор HAVING
-8. `GROUP` BY, аггрегация
+<details>
+    <summary>7. `GROUP` BY, аггрегация</summary>
+
+    Группирует результаты инструкции SELECT. Часто используется с функциями аггрегации (COUNT(), MAX(), MIN(), SUM(), AVG()).
+
+    ```
+    SELECT COUNT(CustomerID), Country
+    FROM Customers
+    GROUP BY Country
+    ```
+
+    Оператор HAVING при этом выполняет функцию фильтрации (аналог WHERE для обычных запросов).
+</details>
+
+<details>
+    <summary>8. Оператор HAVING</summary>
+
+    Используется случаях с аггрегацией (GROUP BY) вместо WHERE, т. к. WHERE с функциями аггрегации использовать нельзя.
+
+    Пример выборки только тех стран, где количество покупателей больше пяти:
+
+    ```
+    SELECT COUNT(CustomerID), Country
+    FROM Customers
+    GROUP BY Country
+    HAVING COUNT(CustomerID) > 5;
+    ```
+</details>
+
 9. Напишите SQL-запрос, который выбирает последние три комментария для каждого пользователя для двух таблиц: comments и authors
 10. Типы данных MySQL
 11. `INSERT`
