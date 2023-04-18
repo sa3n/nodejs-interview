@@ -1276,9 +1276,34 @@ Promise
     ```
 </details>
 
-4. `FULL (OUTER) JOIN`
-5. Напишите SQL-запрос, который выбирает трех авторов, у которых больше всего книг
-6. Напишите SQL-запрос, который выбирает последние три комментария для конкретного пользователя для двух таблиц: comments и authors
+<details>
+    <summary>4. `FULL JOIN`</summary>
+
+    Отсутствует в MySQL. Если для какой-либо из таблиц не нашлось соответсвующей записи в другой таблице, строки первой всё-равно попадают в результирующую таблицу, а строки второй заполнуются NULL. 
+</details>
+
+<details>
+    <summary>5. Напишите SQL-запрос, который выбирает трех авторов, у которых больше всего книг</summary>
+
+    ```
+    SELECT * FROM authors ORDER BY numOfBooks DESC LIMIT 3
+    ```
+
+    Для двух таблиц необходимо использовать GROUP BY и COUNT (запрос лучше проверить!):
+
+    ```
+    SELECT books.author, COUNT(books.author) AS result FROM authors LEFT JOIN books ON books.author = authors.id GROUP BY books.author ORDER BY result DESC LIMIT 3
+    ```
+</details>
+
+<details>
+    <summary>6. Напишите SQL-запрос, который выбирает последние три комментария для конкретного пользователя для двух таблиц: comments и authors</summary>
+
+    ```
+    SELECT * FROM authors LEFT JOIN comments ON authors.id = comments.author WHERE authors.id = 1 ORDER BY comments.date DESC LIMIT 3
+    ```
+</details>
+
 7. Оператор HAVING
 8. `GROUP` BY, аггрегация
 9. Напишите SQL-запрос, который выбирает последние три комментария для каждого пользователя для двух таблиц: comments и authors
